@@ -1,1 +1,1 @@
-# NBA_Prediction_Analytics
+# NBA Prediction Analytics - Shiny App
