@@ -26,9 +26,6 @@ library(ggrepel)
 
 options(warn=-1)
 
-#save(tweets.text,file="C:/Users/ayush/Documents/BAIM - Purdue 2021/Summer 2021 - Courses/Module 3/MGMT 590RA - Using R for Analytics/Project Upload/tweets_10K_clean.RData")
-#setwd("C:/Users/ayush/Documents/BAIM - Purdue 2021/Summer 2021 - Courses/Module 3/MGMT 590RA - Using R for Analytics/Project Upload/")
-
 #### Team List ####
 team_list <- c("Boston Celtics", "Brooklyn Nets", "New York Knicks", "Philadelphia 76ers", "Toronto Raptors",
                "Chicago Bulls","Cleveland Cavaliers","Detroit Pistons","Indiana Pacers","Milwaukee Bucks",
@@ -71,8 +68,8 @@ team_id <- c("Boston Celtics"="1610612738", "Brooklyn Nets"="1610612751", "New Y
 #load("tweets_10K.RData") #Direct twitter feed downloaded using TwitteR library and searchTwitter function hitting the Twitter API. Account got blocked as we hit the Twitter API 10K times.
 #tweets.text <- sapply(tweets_10K, function(x) x$getText())  #List of Tweets is more than 32Mb and uploading it on server caused issues so had to clean it and store it separately
 #save(tweets.text,file="./Data/tweets_10K_clean.RData")
-tweets <- read_tsv("./Data/twitterfeed.tsv")
 load("./Data/tweets_10K_clean.RData")
+tweets <- read_tsv("./Data/twitterfeed.tsv")
 tweets.text <- gsub("rt", "", tweets.text)
 tweets.text <- gsub("@\\w+", "", tweets.text)
 tweets.text <- gsub("[[:punct:]]", "", tweets.text)
