@@ -26,6 +26,9 @@ library(ggrepel)
 
 options(warn=-1)
 
+#save(tweets.text,file="C:/Users/ayush/Documents/BAIM - Purdue 2021/Summer 2021 - Courses/Module 3/MGMT 590RA - Using R for Analytics/Project Upload/tweets_10K_clean.RData")
+#setwd("C:/Users/ayush/Documents/BAIM - Purdue 2021/Summer 2021 - Courses/Module 3/MGMT 590RA - Using R for Analytics/Project Upload/")
+
 #### Team List ####
 team_list <- c("Boston Celtics", "Brooklyn Nets", "New York Knicks", "Philadelphia 76ers", "Toronto Raptors",
                "Chicago Bulls","Cleveland Cavaliers","Detroit Pistons","Indiana Pacers","Milwaukee Bucks",
@@ -68,8 +71,8 @@ team_id <- c("Boston Celtics"="1610612738", "Brooklyn Nets"="1610612751", "New Y
 #load("tweets_10K.RData") #Direct twitter feed downloaded using TwitteR library and searchTwitter function hitting the Twitter API. Account got blocked as we hit the Twitter API 10K times.
 #tweets.text <- sapply(tweets_10K, function(x) x$getText())  #List of Tweets is more than 32Mb and uploading it on server caused issues so had to clean it and store it separately
 #save(tweets.text,file="./Data/tweets_10K_clean.RData")
-load("./Data/tweets_10K_clean.RData")
 tweets <- read_tsv("./Data/twitterfeed.tsv")
+load("./Data/tweets_10K_clean.RData")
 tweets.text <- gsub("rt", "", tweets.text)
 tweets.text <- gsub("@\\w+", "", tweets.text)
 tweets.text <- gsub("[[:punct:]]", "", tweets.text)
@@ -268,7 +271,7 @@ dashBody <- dashboardBody(
                                                                                      width="100%",status="info",br(), br(),imageOutput("teamimage", height="200px")))),
                                           fluidRow(box(title="Matches won every season", width=12,solidHeader=T, status="info",plotOutput("wins_years_bar"))),
                                           br(),
-                                          fluidRow(box(title="Team Statistics (Last 5 Seasons", status="info", solidHeader=T,width=12,
+                                          fluidRow(box(title="Team Statistics (Last 5 Seasons)", status="info", solidHeader=T,width=12,
                                                    tableOutput("last_five_table2"))),
                                           fluidRow(box(title="Team Performance Statistical Relations", status="info", solidHeader=T, width=12,height="570px",
                                                        column(width=3,selectInput("results_x", "Choose an X Variable to Plot: ", choices =  names(numeric_last_five), selected="Pace")),
@@ -314,11 +317,11 @@ dashBody <- dashboardBody(
                                  fluidRow(box(title="Players Attack Ranking", status="info", solidHeader=T, width=12,
                                               plotOutput("plot_att") %>% helper(icon="question", colour="green", type="inline",
                                                                                 content = c("<p> <b>Graph 1</b>: Attacking Rank: based on Average Points </br> Height ( on y axis ) -> Average points earned by a player each game </br> Color Gradient ( black to red ) -> Redder color indicates higher number of total points. </br> This inturn indicates that the player has been playing for a long time </br> For players with a higher Total, the given Average rating statistic also becomes more reliable, as it has been recorded over a longer period of time </br> It would also mean that the player is more experienced </br> :: Higher the better! </br> :: Redder he better! </p>",
-                                                                                            "<p> <b>Graph 2</b>: Attacking Rank: based on Average Assists </br> Height ( on y axis ) -> Average assists given by a player each game</br> Color Gradient ( black to blue ) -> Bluer color indicates higher number of total points.</br> This inturn indicates that the player has been playing for a long time </br> For players with a higher Total, the given Average rating statistic also becomes more reliable, as it has been recorded over a longer period of time</br> It would also mean that the player is more experienced </br> Higher the better!</br> :: Bluer the better! </p>"))
+                                                                                            "<p> <b>Graph 2</b>: Attacking Rank: based on Average Assists </br> Height ( on y axis ) -> Average assists given by a player each game</br> Color Gradient ( black to blue ) -> Bluer color indicates higher number of total assists. </br> This inturn indicates that the player has been playing for a long time </br> For players with a higher Total, the given Average rating statistic also becomes more reliable, as it has been recorded over a longer period of time</br> It would also mean that the player is more experienced </br> Higher the better!</br> :: Bluer the better! </p>"))
                                  )),
                                  fluidRow(box(title="Players Defense Ranking", status="info", solidHeader=T, width=12,
                                               plotOutput("plot_def") %>% helper(icon="question", colour="green", type="inline",
-                                                                                content = c("<p>Our metric for defensive performance is <b> defensive rebounds  </b> i.e., when a player obtains the possession of the ball after a missed shot by the offense.</br></br>Graph: Defensive Rank: based on Average Defensive Rebounds </br> X axis -> Average defensive rebounds given by a player each game</br> Color Gradient ( black to Green ) -> Green color indicates higher number of total points.</br></br>:: Further on the X Axis (horizontally), the better!</br>:: Greener the better! </p>"))))
+                                                                                content = c("<p>Our metric for defensive performance is <b> defensive rebounds  </b> i.e., when a player obtains the possession of the ball after a missed shot by the offense.</br></br>Graph: Defensive Rank: based on Average Defensive Rebounds </br> X axis -> Average defensive rebounds given by a player each game</br> Color Gradient ( black to Green ) -> Green color indicates higher number of total defensive points</br></br>:: Further on the X Axis (horizontally), the better!</br>:: Greener the better! </p>"))))
                                  ),
                         tabPanel("Player Comparison",selectInput("pid2", "Select second player","Names"),verbatimTextOutput("pn2"),
                                  tableOutput("pi2"),
@@ -358,8 +361,6 @@ dashBody <- dashboardBody(
             )
     ),
     tabItem(tabName = 'Clustering',
-            fluidRow(box(title="# of Clusters to create", width=12, status="info", solidHeader=T,
-                         plotOutput("wssplot"))),
             fluidRow(box(title="Clusters of Players", width=12, status="info", solidHeader=T,
                          plotOutput("clusteranalysis", height="800px"))
             )
@@ -465,8 +466,8 @@ server <- function(input, output, session){
     # graph 2 showing attacking rank among other players based on points - 
     p <- ggplot(data = gen_data(), aes(x = player_name, y = avg_pts)) + ggtitle("Attacking rank based on Points") +
       geom_point(aes(color = total_pts, shape = selected, size = selected)) + scale_colour_gradient(low = "black", high = "red") + xlab("--All players--") + ylab("Average Points")
-    p <- p  + theme_classic() + theme(axis.text.x=element_blank(), legend.position="none")+ geom_text(aes(label = player_name),data = gen_data() %>% filter(selected == 1),nudge_y = 0.1) 
-    p <- p + labs(color = "Total Points")
+    p <- p  + theme_classic() + theme(axis.text.x=element_blank())+ geom_text(aes(label = player_name),data = gen_data() %>% filter(selected == 1),nudge_y = 0.1) 
+    p <- p + labs(color = "Total Points") + guides(shape=FALSE, size=FALSE)
     p <- p + theme(
       plot.title = element_text(color="black", size=15, face="bold"),
       axis.title.x = element_text(color="black", size=12, face="bold"),
@@ -475,7 +476,7 @@ server <- function(input, output, session){
     q <- ggplot(data = gen_data(), aes(x = player_name, y = avg_ast)) + ggtitle("Attacking rank based on Assists ") +
       geom_point(aes(color = total_ast, shape = selected, size = selected)) + scale_colour_gradient(low = "black", high = "blue") + xlab("--All players--") + ylab("Average Assists")
    
-    q <- q + theme_classic() + theme(axis.text.x=element_blank(), legend.position = "none")  + geom_text(aes(label = player_name),data = gen_data() %>% filter(selected == 1),nudge_y = 0.1)
+    q <- q + theme_classic() + theme(axis.text.x=element_blank()) + guides(shape=FALSE, size=FALSE) + geom_text(aes(label = player_name),data = gen_data() %>% filter(selected == 1),nudge_y = 0.1)
     q <- q + labs(color = "Total Assists") + theme(
       plot.title = element_text(color="black", size=15, face="bold"),
       axis.title.x = element_text(color="black", size=12, face="bold"),
@@ -489,7 +490,7 @@ server <- function(input, output, session){
     #plot
     gd <- ggplot(graph_data, aes(x=player_name, y=avg_def)) 
     gd = gd + geom_point(aes(color = total_def, shape = selected, size = selected)) 
-    gd = gd + theme_classic() + theme(axis.text.y = element_blank(), legend.position = "none") 
+    gd = gd + theme_classic() + theme(axis.text.y = element_blank()) + guides(shape=FALSE, size=FALSE) 
     gd = gd + coord_flip() 
     gd = gd + scale_colour_gradient(low = "black", high = "green") 
     gd = gd + geom_text(aes(label = player_name),data = gen_data() %>% filter(selected == 1),nudge_y = 0.04) 
@@ -506,26 +507,26 @@ server <- function(input, output, session){
     compare_graph <- gen_data() %>% filter(player_name == input$pid | player_name == input$pid2)
     g1 <- ggplot(compare_graph, aes(player_name, avg_pts,fill = player_name)) + theme(axis.title.x = element_blank(),axis.title.y = element_blank())
     g1<- g1 + geom_bar(stat="identity", width = 0.5) + 
-      labs(title="Average Game Rating") + theme_classic() + theme(legend.position = "0") 
+      labs(title="Average Game Rating", x="Player Name", y="Average Points") + theme_classic() + theme(legend.position = "0") 
     g3 <- ggplot(compare_graph, aes(player_name, games_played ,fill = player_name)) + theme(axis.title.x = element_blank(),axis.title.y = element_blank())
     g3<- g3 + geom_bar(stat="identity", width = 0.5) + 
-      labs(title="Games Played")+ theme_classic() + theme(legend.position = "0")
+      labs(title="Games Played", x="Player Name", y="Games Played")+ theme_classic() + theme(legend.position = "0")
     
     g4 <- ggplot(compare_graph, aes(player_name, avg_reb,fill = player_name)) + theme(axis.title.x = element_blank(),axis.title.y = element_blank())
     g4<- g4 + geom_bar(stat="identity", width = 0.5) + 
-      labs(title="Average Rebounds")+ theme_classic() + theme(legend.position = "0")
+      labs(title="Average Rebounds", x="Player Name", y="Average Rebounds")+ theme_classic() + theme(legend.position = "0")
     
     g5 <- ggplot(compare_graph, aes(player_name, avg_def,fill = player_name)) + theme(axis.title.x = element_blank(),axis.title.y = element_blank())
     g5<- g5 + geom_bar(stat="identity", width = 0.5) + theme_classic() +  theme(legend.position = "0") +
-      labs(title="Average Defesive Rebounds") 
+      labs(title="Average Defensive Rebounds", x="Player Name", y="Average Defensive Points") 
     
     g6  <- ggplot(compare_graph, aes(player_name, avg_ast,fill = player_name)) + theme(axis.title.x = element_blank(),axis.title.y = element_blank())
     g6 <- g6 + geom_bar(stat="identity", width = 0.5) + 
-      labs(title="Average Assist")+ theme_classic() +  theme(legend.position = "0")
+      labs(title="Average Assist", x="Player Name", y="Average Assists")+ theme_classic() +  theme(legend.position = "0")
     
     gpts  <- ggplot(compare_graph, aes(player_name, avg_pts,fill = player_name)) + theme(axis.title.x = element_blank(),axis.title.y = element_blank())
     gpts <- gpts + geom_bar(stat="identity", width = 0.5) + 
-      labs(title="Average Points")+ theme_classic() + theme(legend.position = "0")
+      labs(title="Average Points", x="Player Name", y="Average Points")+ theme_classic() + theme(legend.position = "0")
     
     #displaying comparative graphs
     grid.arrange(g3,g1, gpts,g4,g5,g6, nrow = 2, top= paste(input$pid,"v",input$pid2,"Stats - Last 5 seasons")) 
@@ -552,7 +553,7 @@ server <- function(input, output, session){
     pinf <- active_players_data %>% select(player_name,team_abbreviation,age,player_height,player_weight,college,country,draft_year,season,gp) %>% filter(player_name == input$pid) %>% arrange(desc(season))
     gp <- sum(as.numeric(pinf$gp))
     pinf <- pinf %>% select(team_abbreviation,age,player_height,player_weight,college,country,draft_year)
-    pinf <- pinf %>% rename( "Team" =team_abbreviation,"Age" = age,"Hight"=player_height,"Weight"=player_weight,"College"=college,"Country"=country,"Draft Yaer" =draft_year )
+    pinf <- pinf %>% rename( "Team" =team_abbreviation,"Age" = age,"Height"=player_height,"Weight"=player_weight,"College"=college,"Country"=country,"Draft Year" =draft_year )
     pinf$gp <- gp
     pinf <- pinf %>% rename ("Total Games Played" = gp)
     pinf[1,]
@@ -564,7 +565,7 @@ server <- function(input, output, session){
     pinf <- active_players_data %>% select(player_name,team_abbreviation,age,player_height,player_weight,college,country,draft_year,season,gp) %>% filter(player_name == input$pid2)  %>% arrange(desc(season))
     gp <- sum(as.numeric(pinf$gp))
     pinf <- pinf %>% select(team_abbreviation,age,player_height,player_weight,college,country,draft_year)
-    pinf <- pinf %>% rename( "Team" =team_abbreviation,"Age" = age,"Hight"=player_height,"Weight"=player_weight,"College"=college,"Country"=country,"Draft Yaer" =draft_year )
+    pinf <- pinf %>% rename( "Team" =team_abbreviation,"Age" = age,"Height"=player_height,"Weight"=player_weight,"College"=college,"Country"=country,"Draft Year" =draft_year )
     pinf$gp <- gp
     pinf <- pinf %>% rename ("Total Games Played" = gp)
     pinf[1,]
@@ -726,15 +727,12 @@ server <- function(input, output, session){
   # Convert back to statsDF for ggplot
   statsDF<-data.frame(PrincipalComponents2)
   
-  km.res <- kmeans(active_df[,2:ncol(active_df)],3, nstart = 25)
-  
-  output$wssplot <- renderPlot({
+  km.res <- kmeans(active_df[,2:ncol(active_df)],10, nstart = 25)
     res.dist <- get_dist(active_df[,2:ncol(active_df)], stand = TRUE, method = "euclidean")
     fviz_dist(res.dist, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"),lab_size= 2)
     fviz_nbclust(active_df[,2:ncol(active_df)], kmeans, method = "wss")
-  })
-  
-  
+    #fviz_nbclust(active_df[,2:ncol(active_df)], kmeans, method = "gap_stat")
+    #fviz_nbclust(active_df[,2:ncol(active_df)], kmeans, method = "silhouette")
   
   # Visualize the Clusters
   #top_50 <- head(active_players
